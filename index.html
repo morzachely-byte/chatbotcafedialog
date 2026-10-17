@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Café Dialog</title>
+<style>
+:root{--coffee:#4b2e24;--cream:#fff8ef;--ink:#2b211d}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#fff8ef,#f0e0cf);font-family:system-ui,Segoe UI,Arial;color:var(--ink);display:grid;place-items:center;padding:18px}
+.app{width:min(920px,100%);height:min(780px,calc(100vh - 36px));min-height:520px;background:#fffdf9;border:1px solid #e2cbb3;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:260px 1fr;box-shadow:0 20px 60px #4b2e241c}
+aside{background:linear-gradient(160deg,#4b2e24,#2e1b15);color:#fff8ef;padding:25px 20px;display:flex;flex-direction:column}.brand{font-size:22px;font-weight:750}.tag{font-size:12px;color:#e8d3c1;margin-top:4px}.section{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:#d8bda8;margin:32px 0 10px}.suggestion{padding:12px;text-align:left;border:1px solid #ffffff28;background:#ffffff0c;color:#fff8ef;border-radius:12px;margin:4px 0;cursor:pointer}.note{margin-top:auto;font-size:11px;color:#d8bda8;line-height:1.6}
+main{display:flex;flex-direction:column;min-width:0}.top{padding:18px 22px;border-bottom:1px solid #f0e5d9;display:flex;justify-content:space-between;align-items:center}.status{font-weight:700;font-size:14px}.sub{font-size:11px;color:#66816b;margin-top:3px}.clear{background:white;border:1px solid #e7d8c9;border-radius:10px;padding:8px 10px;color:var(--coffee);cursor:pointer}.chat{flex:1;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:15px}.welcome{padding:16px;background:#fbf1e5;border:1px solid #f0dfcb;border-radius:15px;font-size:13px;line-height:1.6}.msg{display:flex;gap:9px;max-width:92%;align-items:flex-start}.msg.user{align-self:flex-end;flex-direction:row-reverse}.avatar{width:30px;height:30px;flex:0 0 30px;border-radius:10px;background:#f2e0cb;display:grid;place-items:center}.user .avatar{background:var(--coffee);color:white}.bubble{white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f1ea;border-radius:4px 15px 15px 15px;padding:11px 13px;font-size:13px;line-height:1.65}.user .bubble{background:var(--coffee);color:white;border-radius:15px 4px 15px 15px}.composer-wrap{border-top:1px solid #f0e5d9;padding:14px 18px}.composer{display:flex;gap:8px;border:1px solid #e5d4c3;border-radius:15px;padding:7px;background:white}textarea{border:0;outline:0;resize:none;flex:1;min-width:0;max-height:100px;padding:9px;font:inherit;font-size:13px}.send{border:0;background:var(--coffee);color:white;border-radius:11px;padding:10px 14px;cursor:pointer}.send:disabled{opacity:.55}.fine{font-size:10px;text-align:center;color:#9a887c;margin:8px 0 0}
+@media(max-width:650px){body{padding:0;background:#fffdf9}.app{height:100dvh;min-height:0;border:0;border-radius:0;grid-template-columns:1fr}aside{display:none}.chat{padding:16px}.top{padding:14px 16px}.composer-wrap{padding:12px}}
+</style>
+</head>
+<body><div class="app">
+<aside><div class="brand">☕ Café Dialog</div><div class="tag">Teman ngobrol, teman ngopi.</div><div class="section">Coba tanyakan</div>
+<button class="suggestion" data-p="Hai, kenalkan Café Dialog dong!">👋 Kenalan dengan café</button>
+<button class="suggestion" data-p="Ada menu apa saja di Café Dialog?">📖 Tanya menu</button>
+<button class="suggestion" data-p="Rekomendasikan minuman untuk menemani belajar.">☕ Rekomendasi minuman</button>
+<button class="suggestion" data-p="Apa menu yang cocok untuk camilan sore?">🥐 Camilan sore</button>
+<div class="note">Chatbot ini memakai Ollama yang berjalan di komputer pemilik. Komputer dan Ollama harus aktif agar AI bisa menjawab.</div></aside>
+<main><header class="top"><div><div class="status">● Café Dialog Assistant</div><div class="sub">Siap ngobrol dengan kamu</div></div><button id="clear" class="clear">Obrolan baru ↻</button></header>
+<section class="chat" id="chat" aria-live="polite"><div class="welcome" id="welcome"><b>Hai, selamat datang di Café Dialog! ☕</b><br>Aku siap menemani kamu. Mau tanya soal menu, minta rekomendasi, atau sekadar ngobrol santai? Yuk, mulai aja!</div><div class="msg"><div class="avatar">☕</div><div class="bubble">Halo! Senang kamu mampir. Ada yang bisa aku bantu hari ini? 😊</div></div></section>
+<div class="composer-wrap"><form id="form" class="composer"><textarea id="input" rows="1" maxlength="1200" placeholder="Tulis pesan kamu di sini..." required></textarea><button id="send" class="send">Kirim ➤</button></form><p class="fine">Café Dialog • Pastikan informasi menu dan harga dikonfirmasi ke café.</p></div></main>
+</div>
+<script>
+/* Setelah menjalankan Cloudflare Tunnel, ganti URL ini dengan URL HTTPS yang diberikan cloudflared. */
+const API_URL = "https://GANTI-DENGAN-URL-TUNNEL";
+const chat=document.getElementById("chat"),form=document.getElementById("form"),input=document.getElementById("input"),send=document.getElementById("send");
+const history=[];
+function add(role,text){const row=document.createElement("div");row.className="msg "+(role==="user"?"user":"");const av=document.createElement("div");av.className="avatar";av.textContent=role==="user"?"🙂":"☕";const b=document.createElement("div");b.className="bubble";b.textContent=text;row.append(av,b);chat.append(row);chat.scrollTop=chat.scrollHeight;return row}
+async function ask(text){text=text.trim();if(!text||send.disabled)return;document.getElementById("welcome")?.remove();add("user",text);history.push({role:"user",content:text});input.value="";send.disabled=true;send.textContent="…";const wait=add("assistant","Sebentar ya, aku sedang menyiapkan jawaban…");
+try{if(API_URL.includes("GANTI-DENGAN"))throw new Error("Website belum dihubungkan ke tunnel Ollama.");const r=await fetch(API_URL+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:history.slice(-10)})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Server belum bisa memproses pesan.");wait.remove();add("assistant",d.reply);history.push({role:"assistant",content:d.reply})}
+catch(e){wait.remove();add("assistant","Maaf, aku belum bisa terhubung ke Ollama. "+e.message+" Coba lagi ya.");history.pop()}
+finally{send.disabled=false;send.textContent="Kirim ➤";input.focus()}}
+form.addEventListener("submit",e=>{e.preventDefault();ask(input.value)});input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});input.addEventListener("input",()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,100)+"px"});
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>ask(b.dataset.p)));
+document.getElementById("clear").addEventListener("click",()=>{history.length=0;chat.innerHTML='<div class="welcome" id="welcome"><b>Obrolan baru dimulai! ☕</b><br>Ada yang ingin kamu tanyakan? Aku siap membantu.</div>';add("assistant","Hai lagi! Mau ngobrol tentang apa hari ini? 😊")});
+</script></body></html>
